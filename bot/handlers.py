@@ -12,7 +12,7 @@ from telegram.ext import ContextTypes
 from bot.keyboards import start_keyboard, ad_keyboard, start_keyboard_admin, validate_keyboard
 from database.models import CreateUserRequest
 from database.services import create_or_update_user, add_phone_to_user, fetch_ads_by_user, unpublished_ad, \
-    set_publish_ad_id, fetch_ads_to_validate, fetch_ad_by_id
+    set_publish_ad_id, fetch_ads_to_validate, fetch_ad_by_id, reject_ad
 
 
 async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -30,7 +30,7 @@ async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text=f'Привет, {update.effective_chat.first_name}! Выбери действие:',
-        reply_markup=start_keyboard_admin if user.is_admin else start_keyboard
+        reply_markup=start_keyboard_admin if user and user.is_admin else start_keyboard
     )
 
 
@@ -91,7 +91,7 @@ async def delete_ad_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ad = await unpublished_ad(ad_id)
         for message in ad.messages:
             await context.bot.delete_message(
-                chat_id='@ad_board',
+                chat_id='@wolrus_board',
                 message_id=message.message_id
             )
         await context.bot.send_message(
@@ -183,21 +183,21 @@ async def validate_ad_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
             for ad in ads:
                 if len(ad.images) > 1:
                     results = await context.bot.send_media_group(
-                        chat_id='@ad_board',
+                        chat_id='@wolrus_board',
                         media=context.chat_data['files']
                     )
                     message_ids = [{'message_id': int(result.id), 'ad_id': int(ad_id)} for result in results]
                     await set_publish_ad_id(message_ids)
                 elif len(ad.images) == 1:
                     result = await context.bot.send_photo(
-                        chat_id='@ad_board',
+                        chat_id='@wolrus_board',
                         photo=update.effective_message.photo[-1].file_id,
                         caption=update.effective_message.caption
                     )
                     await set_publish_ad_id([{'message_id': int(result.message_id), 'ad_id': int(ad_id)}])
                 else:
                     result = await context.bot.send_message(
-                        chat_id='@ad_board',
+                        chat_id='@wolrus_board',
                         text=update.effective_message.text,
                         parse_mode=ParseMode.HTML
                     )
@@ -214,6 +214,7 @@ async def validate_ad_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
                 context.bot_data['ad_user_id'] = ad.user.telegram_id
         else:
             ad = ads[0]
+            await reject_ad(ad_id)
             context.bot_data['ad_user_id'] = ad.user.telegram_id
             context.chat_data['is_reject'] = True
             await context.bot.send_message(

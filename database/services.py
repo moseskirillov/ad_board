@@ -144,6 +144,7 @@ async def fetch_ads_to_validate():
             result = await session.execute(
                 select(Ad)
                 .where(Ad.is_valid.is_(False))
+                .where(Ad.is_rejected.is_(False))
             )
             ads_result = result.scalars().unique().all()
             if ads_result:
@@ -174,6 +175,16 @@ async def unpublished_ad(ad_id):
             first_ad.is_published = False
             await session.commit()
             return first_ad
+
+
+async def reject_ad(ad_id):
+    async with async_session() as session:
+        async with session.begin():
+            await session.execute(
+                update(Ad)
+                .where(Ad.id == int(ad_id))
+                .values(is_rejected=True)
+            )
 
 
 async def fetch_ad_by_id(ad_id: str):

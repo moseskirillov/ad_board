@@ -330,6 +330,9 @@ async def conversation_publish(update: Update, context: ContextTypes.DEFAULT_TYP
                  'Нажмите /start для возврата в главное меню',
             parse_mode=ParseMode.HTML
         )
+        context.chat_data['files'] = None
+        context.chat_data['photo_id'] = None
+        context.chat_data['media_id'] = None
         return ConversationHandler.END
     else:
         await update.callback_query.answer()

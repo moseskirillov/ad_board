@@ -40,6 +40,7 @@ class Ad(Base):
     description: Mapped[str] = mapped_column(String(length=1000), nullable=False)
     cost: Mapped[int] = mapped_column(Integer, nullable=False)
     is_valid: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_rejected: Mapped[bool] = mapped_column(Boolean, default=False)
     is_published: Mapped[bool] = mapped_column(Boolean, default=False)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     user: Mapped['User'] = relationship(back_populates='ads', lazy='joined')
