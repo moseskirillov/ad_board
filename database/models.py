@@ -33,8 +33,10 @@ class AdResponse:
     image_ids: [str]
 
     def __str__(self) -> str:
-        return (f'<b>{self.title}</b>\n\n'
-                f'<b>Описание:</b>\n{self.description}\n\n'
-                f'<b>Цена:</b> {self.cost} руб.\n\n'
-                f'<b>Категория:</b> #{self.category}\n'
-                f'<b>Продавец:</b> @{self.user_telegram}')
+        return (
+            f"<b>{self.title}</b>\n\n"
+            f"<b>Описание:</b>\n{self.description}\n\n"
+            f"<b>Цена:</b> {self.cost} руб.\n\n"
+            f"<b>Категория:</b> #{self.category}\n"
+            f"<b>Продавец:</b> @{self.user_telegram}"
+        )
